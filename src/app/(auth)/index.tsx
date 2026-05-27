@@ -1,11 +1,7 @@
-import { Text, View } from "react-native";
+import { AuthScreen } from "@/components";
 
-const AuthScreen = () => {
-  return (
-    <View>
-      <Text>AuthScreen</Text>
-    </View>
-  );
+const Auth = () => {
+  return <AuthScreen />;
 };
 
-export default AuthScreen;
+export default Auth;
