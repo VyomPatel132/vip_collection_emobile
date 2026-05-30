@@ -1,10 +1,9 @@
-import { SafeScreen } from "@/components";
-import { Text } from "react-native";
+import { ProfileScreen, SafeScreen } from "@/components";
 
 const Profile = () => {
   return (
     <SafeScreen>
-      <Text className="text-2xl font-bold text-center">Profile</Text>
+      <ProfileScreen />
     </SafeScreen>
   );
 };
