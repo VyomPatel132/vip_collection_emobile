@@ -1,11 +1,7 @@
-import { AddressScreen, SafeScreen } from "@/components";
+import { AddressScreen } from "@/components";
 
 const Addresses = () => {
-  return (
-    <SafeScreen>
-      <AddressScreen />
-    </SafeScreen>
-  );
+  return <AddressScreen />;
 };
 
 export default Addresses;
