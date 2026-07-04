@@ -1,10 +1,9 @@
-import { SafeScreen } from "@/components";
-import { Text } from "react-native";
+import { PrivacySecurityScreen, SafeScreen } from "@/components";
 
 const PrivacySecurity = () => {
   return (
     <SafeScreen>
-      <Text>PrivacySecurity</Text>
+      <PrivacySecurityScreen />
     </SafeScreen>
   );
 };

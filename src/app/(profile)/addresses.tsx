@@ -1,10 +1,9 @@
-import { SafeScreen } from "@/components";
-import { Text } from "react-native";
+import { AddressScreen, SafeScreen } from "@/components";
 
 const Addresses = () => {
   return (
     <SafeScreen>
-      <Text>addresses</Text>
+      <AddressScreen />
     </SafeScreen>
   );
 };
