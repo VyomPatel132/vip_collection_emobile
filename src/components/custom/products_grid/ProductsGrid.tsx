@@ -1,6 +1,7 @@
 import { useCart, useWishlist } from "@/hooks";
 import { Product } from "@/types";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import {
   ActivityIndicator,
   Alert,
@@ -65,7 +66,7 @@ export const ProductsGrid = (props: ProductsGridProps) => {
       className="bg-surface rounded-3xl overflow-hidden mb-3"
       style={{ width: "48%" }}
       activeOpacity={0.8}
-      // onPress={() => router.push(`/product/${product._id}`)}
+      onPress={() => router.push(`/product/${product._id}`)}
     >
       <View className="relative">
         <Image
