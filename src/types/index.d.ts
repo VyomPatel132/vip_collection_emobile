@@ -51,10 +51,35 @@ export interface Order {
   };
   paymentResult: {
     id: string;
+    orderId?: string;
+    signature?: string;
     status: string;
+    provider?: string;
+    method?: string;
+    amount?: number;
+    currency?: string;
+    captured?: boolean;
+    email?: string;
+    contact?: string;
+    bank?: string;
+    wallet?: string;
+    vpa?: string;
+    cardLast4?: string;
+    cardNetwork?: string;
+    refundedAt?: string;
   };
+  paymentMethod?: string;
+  paymentStatus: "pending" | "paid" | "failed" | "refunded";
+  subtotal: number;
+  shipping: number;
+  tax: number;
   totalPrice: number;
-  status: "pending" | "shipped" | "delivered";
+  status:
+    | "pending"
+    | "confirmed"
+    | "shipped"
+    | "delivered"
+    | "cancelled";
   hasReviewed: boolean;
   createdAt: string;
   updatedAt: string;
