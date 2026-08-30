@@ -6,15 +6,34 @@ import { Image } from "expo-image";
 import { router } from "expo-router";
 import {
   ActivityIndicator,
+  Alert,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const TAB_BAR_HEIGHT = 32; // matches the value set in (tabs)/_layout.tsx
+const CTA_VISUAL_GAP = 16; // breathing room between CTA and tab bar
 
 const Cart = () => {
-  const { cart, isLoading, isError, cartTotal, cartItemCount, updateQuantity } =
-    useCart();
+  const insets = useSafeAreaInsets();
+  const {
+    cart,
+    isLoading,
+    isError,
+    cartTotal,
+    cartItemCount,
+    updateQuantity,
+    removeFromCart,
+    isRemoving,
+  } = useCart();
+
+  // Total vertical space reserved at the bottom of the screen for the
+  // floating tab bar (positioned absolute at `bottom: insets.bottom`)
+  // and the visual gap below our CTA.
+  const tabBarClearance = insets.bottom + TAB_BAR_HEIGHT + CTA_VISUAL_GAP;
 
   if (isLoading) {
     return (
@@ -65,9 +84,27 @@ const Cart = () => {
     );
   }
 
+  const handleRemove = (item: any) => {
+    Alert.alert(
+      "Remove from cart?",
+      `${item.product.name} will be removed from your cart.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Remove",
+          style: "destructive",
+          onPress: () => removeFromCart(item.product._id),
+        },
+      ],
+    );
+  };
+
   return (
     <SafeScreen>
-      <View className="flex-1 px-5 pb-28">
+      <View
+        className="flex-1 px-5"
+        style={{ paddingBottom: tabBarClearance + 120 }}
+      >
         <View className="flex-row items-center justify-between py-5">
           <Text className="text-text-primary text-3xl font-bold">Cart</Text>
           <Text className="text-text-secondary text-sm">
@@ -77,7 +114,7 @@ const Cart = () => {
 
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 12 }}
+          contentContainerStyle={{ paddingBottom: 16 }}
         >
           {cart.items.map((item) => (
             <View
@@ -91,12 +128,26 @@ const Cart = () => {
               />
 
               <View className="flex-1 ml-3 justify-between">
-                <Text
-                  className="text-text-primary font-bold text-base"
-                  numberOfLines={2}
-                >
-                  {item.product.name}
-                </Text>
+                <View className="flex-row items-start justify-between">
+                  <Text
+                    className="text-text-primary font-bold text-base flex-1 pr-2"
+                    numberOfLines={2}
+                  >
+                    {item.product.name}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => handleRemove(item)}
+                    disabled={isRemoving}
+                    className="px-1 -mt-1 -mr-1"
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Ionicons
+                      name="trash-outline"
+                      size={18}
+                      color="#ef4444"
+                    />
+                  </TouchableOpacity>
+                </View>
 
                 <Text className="text-primary font-bold text-lg mt-1">
                   {formatINR(item.product.price)}
@@ -141,24 +192,27 @@ const Cart = () => {
             </View>
           ))}
         </ScrollView>
+      </View>
 
-        <View className="absolute bottom-0 left-0 right-0 bg-background px-5 pb-4 pt-3 border-t border-surface">
-          <View className="flex-row items-center justify-between mb-4">
-            <Text className="text-text-secondary text-base">Subtotal</Text>
-            <Text className="text-text-primary text-xl font-bold">
-              {formatINR(cartTotal)}
-            </Text>
-          </View>
-
-          <TouchableOpacity
-            className="bg-primary rounded-2xl py-4 items-center"
-            onPress={() => router.push("/(profile)/checkout")}
-          >
-            <Text className="text-background text-base font-bold">
-              Proceed to Checkout
-            </Text>
-          </TouchableOpacity>
+      <View
+        className="absolute left-0 right-0 bg-background px-5 pt-3 border-t border-surface"
+        style={{ bottom: tabBarClearance }}
+      >
+        <View className="flex-row items-center justify-between mb-3">
+          <Text className="text-text-secondary text-base">Subtotal</Text>
+          <Text className="text-text-primary text-xl font-bold">
+            {formatINR(cartTotal)}
+          </Text>
         </View>
+
+        <TouchableOpacity
+          className="bg-primary rounded-2xl py-4 items-center"
+          onPress={() => router.push("/(profile)/checkout")}
+        >
+          <Text className="text-background text-base font-bold">
+            Proceed to Checkout
+          </Text>
+        </TouchableOpacity>
       </View>
     </SafeScreen>
   );

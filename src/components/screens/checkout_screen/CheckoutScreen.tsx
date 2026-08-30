@@ -130,11 +130,14 @@ export const CheckoutScreen = () => {
           );
         },
         onError: (error: any) => {
+          const detail = error?.response?.data?.detail;
+          const message =
+            error?.response?.data?.error ||
+            error?.message ||
+            "Could not complete payment. Please try again.";
           Alert.alert(
             "Payment failed",
-            error?.response?.data?.error ||
-              error?.message ||
-              "Could not complete payment. Please try again.",
+            detail ? `${message}\n\n${detail}` : message,
           );
         },
       },

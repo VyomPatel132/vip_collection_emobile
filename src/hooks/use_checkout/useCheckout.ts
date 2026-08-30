@@ -11,7 +11,7 @@ export const useCheckout = () => {
       shippingAddress,
     }: CreateCheckoutPayload) => {
       const { data } = await api.post<CreateOrderResponse>(
-        "/payments/create-order",
+        "/payment/create-order",
         {
           cartItems,
           shippingAddress,
@@ -41,7 +41,7 @@ export const useCheckout = () => {
       const paymentData = await RazorpayCheckout.open(options);
 
       const { data: verification } = await api.post<VerifyPaymentResponse>(
-        "/payments/verify",
+        "/payment/verify",
         {
           razorpay_order_id: paymentData.razorpay_order_id,
           razorpay_payment_id: paymentData.razorpay_payment_id,
