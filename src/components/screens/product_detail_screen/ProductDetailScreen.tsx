@@ -1,18 +1,21 @@
 import { ErrorUI, LoadingUI, SafeScreen } from "@/components/custom";
+import { BouncyButton, Icon } from "@/components/ui";
 import { useCart, useProduct, useWishlist } from "@/hooks";
-import { Ionicons } from "@expo/vector-icons";
+import { useThemeColor } from "@/hooks/useThemeColor";
+import { formatINR } from "@/lib/payment";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
+import Animated, { FadeIn, FadeInUp } from "react-native-reanimated";
 
 const { width } = Dimensions.get("window");
 
@@ -20,6 +23,7 @@ export const ProductDetailScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: product, isError, isLoading } = useProduct(id);
   const { addToCart, isAddingToCart } = useCart();
+  const { colors } = useThemeColor();
 
   const {
     isInWishlist,
@@ -62,14 +66,12 @@ export const ProductDetailScreen = () => {
           onPress={() => router.back()}
           activeOpacity={0.7}
         >
-          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+          <Icon name="arrow-back" size={24} color="#FFFFFF" />
         </TouchableOpacity>
 
         <TouchableOpacity
           className={`w-12 h-12 rounded-full items-center justify-center ${
-            isInWishlist(product._id)
-              ? "bg-primary"
-              : "bg-black/50 backdrop-blur-xl"
+            isInWishlist(product._id) ? "bg-primary dark:bg-primary" : "bg-black/50 backdrop-blur-xl"
           }`}
           onPress={() => toggleWishlist(product._id)}
           disabled={isAddingToWishlist || isRemovingFromWishlist}
@@ -78,10 +80,14 @@ export const ProductDetailScreen = () => {
           {isAddingToWishlist || isRemovingFromWishlist ? (
             <ActivityIndicator size="small" color="#FFFFFF" />
           ) : (
-            <Ionicons
+            <Icon
               name={isInWishlist(product._id) ? "heart" : "heart-outline"}
               size={24}
-              color={isInWishlist(product._id) ? "#121212" : "#FFFFFF"}
+              // The heart is drawn over a colored circular backdrop
+              // (gold when active, dark-translucent when inactive),
+              // so the literal white/black here is intentional and
+              // independent of the page theme.
+              color={isInWishlist(product._id) ? colors.onPrimary : "#FFFFFF"}
             />
           )}
         </TouchableOpacity>
@@ -93,7 +99,7 @@ export const ProductDetailScreen = () => {
         contentContainerStyle={{ paddingBottom: 100 }}
       >
         {/* IMAGE GALLERY */}
-        <View className="relative">
+        <Animated.View entering={FadeIn.duration(400)} className="relative">
           <ScrollView
             horizontal
             pagingEnabled
@@ -120,53 +126,53 @@ export const ProductDetailScreen = () => {
               <View
                 key={index}
                 className={`h-2 rounded-full ${
-                  index === selectedImageIndex
-                    ? "bg-primary w-6"
-                    : "bg-white/50 w-2"
+                  index === selectedImageIndex ? "bg-primary w-6" : "bg-white/50 w-2"
                 }`}
               />
             ))}
           </View>
-        </View>
+        </Animated.View>
 
         {/* PRODUCT INFO */}
-        <View className="p-6">
+        <Animated.View entering={FadeInUp.delay(80).duration(400)} className="p-6">
           {/* Category */}
           <View className="flex-row items-center mb-3">
             <View className="bg-primary/20 px-3 py-1 rounded-full">
-              <Text className="text-primary text-xs font-bold">
+              <Text className="text-primary dark:text-primary text-xs font-bold">
                 {product.category}
               </Text>
             </View>
           </View>
 
           {/* Product Name */}
-          <Text className="text-text-primary text-3xl font-bold mb-3">
+          <Text className="text-text-primary dark:text-text-primary text-3xl font-bold mb-3">
             {product.name}
           </Text>
 
           {/* Rating & Reviews */}
           <View className="flex-row items-center mb-4">
-            <View className="flex-row items-center bg-surface px-3 py-2 rounded-full">
-              <Ionicons name="star" size={16} color="#FFC107" />
-              <Text className="text-text-primary font-bold ml-1 mr-2">
+            <View className="flex-row items-center bg-surface dark:bg-surface px-3 py-2 rounded-full">
+              {/* Star color is intentionally a literal — it reads as
+                  "rating star" in both modes regardless of theme. */}
+              <Icon name="star" size={16} color="#FFC107" />
+              <Text className="text-text-primary dark:text-text-primary font-bold ml-1 mr-2">
                 {product.averageRating.toFixed(1)}
               </Text>
-              <Text className="text-text-secondary text-sm">
+              <Text className="text-text-secondary dark:text-text-secondary text-sm">
                 ({product.totalReviews} reviews)
               </Text>
             </View>
             {inStock ? (
               <View className="ml-3 flex-row items-center">
-                <View className="w-2 h-2 bg-green-500 rounded-full mr-2" />
-                <Text className="text-green-500 font-semibold text-sm">
+                <View className="w-2 h-2 bg-success rounded-full mr-2" />
+                <Text className="text-success dark:text-success font-semibold text-sm">
                   {product.stock} in stock
                 </Text>
               </View>
             ) : (
               <View className="ml-3 flex-row items-center">
-                <View className="w-2 h-2 bg-red-500 rounded-full mr-2" />
-                <Text className="text-red-500 font-semibold text-sm">
+                <View className="w-2 h-2 bg-danger rounded-full mr-2" />
+                <Text className="text-danger dark:text-danger font-semibold text-sm">
                   Out of Stock
                 </Text>
               </View>
@@ -175,55 +181,53 @@ export const ProductDetailScreen = () => {
 
           {/* Price */}
           <View className="flex-row items-center mb-6">
-            <Text className="text-primary text-4xl font-bold">
-              ${product.price.toFixed(2)}
+            <Text className="text-primary dark:text-primary text-4xl font-bold">
+              {formatINR(product.price)}
             </Text>
           </View>
 
           {/* Quantity */}
           <View className="mb-6">
-            <Text className="text-text-primary text-lg font-bold mb-3">
+            <Text className="text-text-primary dark:text-text-primary text-lg font-bold mb-3">
               Quantity
             </Text>
 
             <View className="flex-row items-center">
-              <TouchableOpacity
-                className="bg-surface rounded-full w-12 h-12 items-center justify-center"
+              <BouncyButton
+                className="bg-surface dark:bg-surface rounded-full w-12 h-12 items-center justify-center"
                 onPress={() => setQuantity(Math.max(1, quantity - 1))}
-                activeOpacity={0.7}
                 disabled={!inStock}
               >
-                <Ionicons
+                <Icon
                   name="remove"
                   size={24}
-                  color={inStock ? "#FFFFFF" : "#666"}
+                  color={inStock ? "text" : "muted"}
                 />
-              </TouchableOpacity>
+              </BouncyButton>
 
-              <Text className="text-text-primary text-xl font-bold mx-6">
+              <Text className="text-text-primary dark:text-text-primary text-xl font-bold mx-6">
                 {quantity}
               </Text>
 
-              <TouchableOpacity
-                className="bg-primary rounded-full w-12 h-12 items-center justify-center"
+              <BouncyButton
+                className="bg-primary dark:bg-primary rounded-full w-12 h-12 items-center justify-center"
                 onPress={() =>
                   setQuantity(Math.min(product.stock, quantity + 1))
                 }
-                activeOpacity={0.7}
                 disabled={!inStock || quantity >= product.stock}
               >
-                <Ionicons
+                <Icon
                   name="add"
                   size={24}
                   color={
-                    !inStock || quantity >= product.stock ? "#666" : "#121212"
+                    !inStock || quantity >= product.stock ? "muted" : "onPrimary"
                   }
                 />
-              </TouchableOpacity>
+              </BouncyButton>
             </View>
 
             {quantity >= product.stock && inStock && (
-              <Text className="text-orange-500 text-sm mt-2">
+              <Text className="text-warning dark:text-warning text-sm mt-2">
                 Maximum stock reached
               </Text>
             )}
@@ -231,47 +235,50 @@ export const ProductDetailScreen = () => {
 
           {/* Description */}
           <View className="mb-8">
-            <Text className="text-text-primary text-lg font-bold mb-3">
+            <Text className="text-text-primary dark:text-text-primary text-lg font-bold mb-3">
               Description
             </Text>
-            <Text className="text-text-secondary text-base leading-6">
+            <Text className="text-text-secondary dark:text-text-secondary text-base leading-6">
               {product.description}
             </Text>
           </View>
-        </View>
+        </Animated.View>
       </ScrollView>
 
       {/* Bottom Action Bar */}
-      <View className="absolute bottom-0 left-0 right-0 bg-background/95 backdrop-blur-xl border-t border-surface px-6 py-4 pb-8">
+      <Animated.View
+        entering={FadeInUp.delay(150).duration(400)}
+        className="absolute bottom-0 left-0 right-0 bg-background/95 backdrop-blur-xl border-t border-border dark:border-border px-6 py-4 pb-8"
+      >
         <View className="flex-row items-center gap-3">
           <View className="flex-1">
-            <Text className="text-text-secondary text-sm mb-1">
+            <Text className="text-text-secondary dark:text-text-secondary text-sm mb-1">
               Total Price
             </Text>
-            <Text className="text-primary text-2xl font-bold">
-              ${(product.price * quantity).toFixed(2)}
+            <Text className="text-primary dark:text-primary text-2xl font-bold">
+              {formatINR(product.price * quantity)}
             </Text>
           </View>
           <TouchableOpacity
             className={`rounded-2xl px-8 py-4 flex-row items-center ${
-              !inStock ? "bg-surface" : "bg-primary"
+              !inStock ? "bg-surface dark:bg-surface" : "bg-primary dark:bg-primary"
             }`}
             activeOpacity={0.8}
             onPress={handleAddToCart}
             disabled={!inStock || isAddingToCart}
           >
             {isAddingToCart ? (
-              <ActivityIndicator size="small" color="#121212" />
+              <ActivityIndicator size="small" color={colors.onPrimary} />
             ) : (
               <>
-                <Ionicons
+                <Icon
                   name="cart"
                   size={24}
-                  color={!inStock ? "#666" : "#121212"}
+                  color={!inStock ? "muted" : "onPrimary"}
                 />
                 <Text
                   className={`font-bold text-lg ml-2 ${
-                    !inStock ? "text-text-secondary" : "text-background"
+                    !inStock ? "text-text-secondary dark:text-text-secondary" : "text-on-primary dark:text-on-primary"
                   }`}
                 >
                   {!inStock ? "Out of Stock" : "Add to Cart"}
@@ -280,7 +287,7 @@ export const ProductDetailScreen = () => {
             )}
           </TouchableOpacity>
         </View>
-      </View>
+      </Animated.View>
     </SafeScreen>
   );
 };

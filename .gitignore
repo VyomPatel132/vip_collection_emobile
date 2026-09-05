@@ -45,3 +45,6 @@ example
 
 # lock files
 yarn.lock
+
+# extra files / folder
+.claude/

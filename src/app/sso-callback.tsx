@@ -1,3 +1,4 @@
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { useAuth } from "@clerk/expo";
 import { Redirect } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
@@ -16,6 +17,7 @@ import { ActivityIndicator, View } from "react-native";
  */
 export default function SSOCallback() {
   const { isLoaded, isSignedIn } = useAuth();
+  const { colors } = useThemeColor();
 
   if (isLoaded && isSignedIn) {
     return <Redirect href="/(tabs)" />;
@@ -27,10 +29,10 @@ export default function SSOCallback() {
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#0b0b0b",
+        backgroundColor: colors.background,
       }}
     >
-      <ActivityIndicator size="large" color="#1db954" />
+      <ActivityIndicator size="large" color={colors.primary} />
     </View>
   );
 }

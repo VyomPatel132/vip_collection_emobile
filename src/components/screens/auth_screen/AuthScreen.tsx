@@ -11,7 +11,7 @@ export const AuthScreen = () => {
   const { loadingStrategy, handleSocialAuth } = useSocialAuth();
 
   return (
-    <View className="flex-1 justify-center items-center bg-white">
+    <View className="flex-1 justify-center items-center bg-background dark:bg-background">
       <Image
         source={require("@/assets/images/auth-image.png")}
         className="size-96"
@@ -74,13 +74,13 @@ export const AuthScreen = () => {
         </TouchableOpacity>
       </View>
 
-      <Text className="text-center text-gray-500 text-xs leading-4 mt-6 px-2">
+      <Text className="text-center text-text-secondary dark:text-text-secondary text-xs leading-4 mt-6 px-2">
         By signing up, you agree to our{" "}
-        <Text className="text-blue-500">Terms</Text>
+        <Text className="text-primary">Terms</Text>
         {", "}
-        <Text className="text-blue-500">Privacy Policy</Text>
+        <Text className="text-primary">Privacy Policy</Text>
         {", and "}
-        <Text className="text-blue-500">Cookie Use</Text>
+        <Text className="text-primary">Cookie Use</Text>
       </Text>
     </View>
   );

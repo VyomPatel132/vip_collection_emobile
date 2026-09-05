@@ -1,20 +1,43 @@
 import { useApi } from "@/lib/api";
 import { useMutation } from "@tanstack/react-query";
+import { useCallback, useRef } from "react";
 import RazorpayCheckout from "react-native-razorpay";
+
+// Lightweight RFC 4122 v4-ish UUID. We don't need cryptographic strength
+// here — just a stable per-checkout token that the backend can use to
+// de-dupe `createPaymentOrder` calls.
+const newIdempotencyKey = (): string => {
+  // `Math.random` is fine for non-secret tokens.
+  const rand = () => Math.floor(Math.random() * 0x10000).toString(16).padStart(4, "0");
+  return `${rand()}${rand()}-${rand()}-4${rand().slice(1)}-${rand()}-${rand()}${rand()}${rand()}`;
+};
 
 export const useCheckout = () => {
   const api = useApi();
 
-  return useMutation({
+  // One idempotency key per "Place Order" intent. Re-used across a
+  // double-tap on the same checkout and across any axios retry of the
+  // first call, so the backend's `createPaymentOrder` collapses them
+  // into a single Razorpay order. `resetKey()` is exposed so a
+  // successful payment (or an explicit retry button) can start a new
+  // intent with a fresh key.
+  const idempotencyKeyRef = useRef<string>(newIdempotencyKey());
+  const resetKey = useCallback(() => {
+    idempotencyKeyRef.current = newIdempotencyKey();
+  }, []);
+
+  const mutation = useMutation({
     mutationFn: async ({
       cartItems,
       shippingAddress,
     }: CreateCheckoutPayload) => {
       const { data } = await api.post<CreateOrderResponse>(
         "/payment/create-order",
+        { cartItems, shippingAddress },
         {
-          cartItems,
-          shippingAddress,
+          headers: {
+            "Idempotency-Key": idempotencyKeyRef.current,
+          },
         },
       );
 
@@ -60,4 +83,6 @@ export const useCheckout = () => {
       };
     },
   });
+
+  return { ...mutation, resetKey };
 };

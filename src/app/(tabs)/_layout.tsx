@@ -1,23 +1,31 @@
+import { Icon } from "@/components/ui";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { useAuth } from "@clerk/expo";
-import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { Redirect, Tabs } from "expo-router";
 import { StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Animated, { FadeIn } from "react-native-reanimated";
 
 const TabLayout = () => {
   const { isSignedIn, isLoaded } = useAuth();
   const insets = useSafeAreaInsets();
+  const { colors, scheme } = useThemeColor();
 
   if (!isLoaded) return null;
   if (!isSignedIn) return <Redirect href="/(auth)" />;
+
+  // Use the current scheme's blur tint and brand colors so the tab
+  // bar matches the active theme — including the live system-theme
+  // switch.
+  const blurTint = scheme === "dark" ? "dark" : "light";
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#1db954",
-        tabBarInactiveTintColor: "#b3b3b3",
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.text.secondary,
         tabBarStyle: {
           position: "absolute",
           backgroundColor: "transparent",
@@ -30,13 +38,20 @@ const TabLayout = () => {
           overflow: "hidden",
         },
         tabBarBackground: () => (
-          <BlurView
-            intensity={80}
-            tint="dark"
+          // Fade in the BlurView background on first mount so the
+          // tab bar doesn't pop in instantly.
+          <Animated.View
+            entering={FadeIn.duration(500)}
             style={StyleSheet.absoluteFill}
-            // StyleSheet.absoluteFill is equal to this 👇
-            // { position: "absolute", top: 0, right: 0, left: 0, bottom: 0 }
-          />
+          >
+            <BlurView
+              intensity={80}
+              tint={blurTint}
+              style={StyleSheet.absoluteFill}
+              // StyleSheet.absoluteFill is equal to this 👇
+              // { position: "absolute", top: 0, right: 0, left: 0, bottom: 0 }
+            />
+          </Animated.View>
         ),
         tabBarLabelStyle: {
           fontSize: 12,
@@ -49,7 +64,11 @@ const TabLayout = () => {
         options={{
           title: "Shop",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="grid" size={size} color={color} />
+            <Icon
+              name="bag-handle-outline"
+              size={size}
+              color={color as string}
+            />
           ),
         }}
       />
@@ -58,7 +77,7 @@ const TabLayout = () => {
         options={{
           title: "Cart",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="cart" size={size} color={color} />
+            <Icon name="cart" size={size} color={color as string} />
           ),
         }}
       />
@@ -67,7 +86,11 @@ const TabLayout = () => {
         options={{
           title: "Profile",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
+            <Icon
+              name="person-circle-outline"
+              size={size}
+              color={color as string}
+            />
           ),
         }}
       />

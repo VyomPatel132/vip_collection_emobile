@@ -4,11 +4,12 @@ import {
     AddressFormModal,
 } from "@/components/common";
 import { ErrorUI, LoadingUI, SafeScreen } from "@/components/custom";
+import { Icon } from "@/components/ui";
 import { useAddresses } from "@/hooks";
 import { Address } from "@/types";
-import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
 
 export const AddressScreen = () => {
   const {
@@ -141,24 +142,27 @@ export const AddressScreen = () => {
       <AddressesHeader />
 
       {addresses.length === 0 ? (
-        <View className="flex-1 items-center justify-center px-6">
-          <Ionicons name="location-outline" size={80} color="#666" />
-          <Text className="text-text-primary font-semibold text-xl mt-4">
+        <Animated.View
+          entering={FadeIn.duration(400)}
+          className="flex-1 items-center justify-center px-6"
+        >
+          <Icon name="location-outline" size={80} color="muted" />
+          <Text className="text-text-primary dark:text-text-primary font-semibold text-xl mt-4">
             No addresses yet
           </Text>
-          <Text className="text-text-secondary text-center mt-2">
+          <Text className="text-text-secondary dark:text-text-secondary text-center mt-2">
             Add your first delivery address
           </Text>
           <TouchableOpacity
-            className="bg-primary rounded-2xl px-8 py-4 mt-6"
+            className="bg-primary dark:bg-primary rounded-2xl px-8 py-4 mt-6"
             activeOpacity={0.8}
             onPress={handleAddAddress}
           >
-            <Text className="text-background font-bold text-base">
+            <Text className="text-on-primary dark:text-on-primary font-bold text-base">
               Add Address
             </Text>
           </TouchableOpacity>
-        </View>
+        </Animated.View>
       ) : (
         <ScrollView
           className="flex-1"
@@ -178,13 +182,13 @@ export const AddressScreen = () => {
             ))}
 
             <TouchableOpacity
-              className="bg-primary rounded-2xl py-4 items-center mt-2"
+              className="bg-primary dark:bg-primary rounded-2xl py-4 items-center mt-2"
               activeOpacity={0.8}
               onPress={handleAddAddress}
             >
               <View className="flex-row items-center">
-                <Ionicons name="add-circle-outline" size={24} color="#121212" />
-                <Text className="text-background font-bold text-base ml-2">
+                <Icon name="add-circle-outline" size={24} color="onPrimary" />
+                <Text className="text-on-primary dark:text-on-primary font-bold text-base ml-2">
                   Add New Address
                 </Text>
               </View>

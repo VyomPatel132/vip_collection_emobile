@@ -91,7 +91,10 @@ export interface OrderItem {
   name: string;
   price: number;
   quantity: number;
-  image: string;
+  // Backend schema is `images: [String]` (plural). The previous shape
+  // used a singular `image` string, which didn't match the schema
+  // response and forced every consumer to special-case it.
+  images: string[];
 }
 
 export interface Review {

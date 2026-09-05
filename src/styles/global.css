@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ * The Tailwind config exposes each color as `{ DEFAULT, dark }` and
+ * `darkMode: 'class'` drives the dark variant. The `.dark` class
+ * is applied to the root by `app/_layout.tsx` so the `dark:` prefix
+ * resolves on the web build. NativeWind's `setColorScheme("system")`
+ * does the equivalent for React Native.
+ */
+:root { color-scheme: light; }
+:root.dark { color-scheme: dark; }
+
+/* Web-only: keeps the initial paint from flashing the wrong color
+ * before React mounts. On native, SystemUI.setBackgroundColorAsync
+ * in `app/_layout.tsx` does the same job. */
+html, body, #root { background-color: #FFFFFF; }
+html.dark, html.dark body, html.dark #root { background-color: #0B0B0F; }

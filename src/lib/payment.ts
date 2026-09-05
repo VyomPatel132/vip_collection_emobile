@@ -1,19 +1,10 @@
-export const formatINR = (amount: number) =>
-  new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 2,
-  }).format(amount);
-
-// Flat shipping fee that matches the backend (see payment.controller.ts).
-export const SHIPPING_FEE = 10;
-// Tax rate (8% of subtotal) that matches the backend.
-export const TAX_RATE = 0.08;
-
-export const computePricing = (subtotal: number) => {
-  const safeSubtotal = Number.isFinite(subtotal) ? subtotal : 0;
-  const shipping = safeSubtotal > 0 ? SHIPPING_FEE : 0;
-  const tax = Number((safeSubtotal * TAX_RATE).toFixed(2));
-  const total = Number((safeSubtotal + shipping + tax).toFixed(2));
-  return { subtotal: safeSubtotal, shipping, tax, total };
-};
+// Re-export of `@vip/shared/format` so existing `import { formatINR } from
+// "@/lib/payment"` call sites keep working. Pricing *totals* (subtotal,
+// shipping, tax, total) are owned by the backend — see
+// `usePricingPreview` and the `pricing` field on the response of
+// `POST /api/payment/create-order`.
+//
+// We keep an in-repo copy under `src/shared/` (mirrored from the
+// canonical `D:/Projects/shared/` checkout) so Expo's Metro bundler
+// can resolve the import at build time. See `src/shared/README.md`.
+export { formatINR } from "../shared/format";
