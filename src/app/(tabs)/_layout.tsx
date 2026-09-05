@@ -1,4 +1,5 @@
 import { Icon } from "@/components/ui";
+import { useAccentColor } from "@/context/AccentColorContext";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { useAuth } from "@clerk/expo";
 import { BlurView } from "expo-blur";
@@ -11,6 +12,10 @@ const TabLayout = () => {
   const { isSignedIn, isLoaded } = useAuth();
   const insets = useSafeAreaInsets();
   const { colors, scheme } = useThemeColor();
+  // `effective` is the user's chosen accent (or the theme default).
+  // We use it for the active tab tint so picking a new accent in
+  // settings repaints the tab bar without a reload.
+  const { effective: accent } = useAccentColor();
 
   if (!isLoaded) return null;
   if (!isSignedIn) return <Redirect href="/(auth)" />;
@@ -24,7 +29,7 @@ const TabLayout = () => {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.primary,
+        tabBarActiveTintColor: accent,
         tabBarInactiveTintColor: colors.text.secondary,
         tabBarStyle: {
           position: "absolute",

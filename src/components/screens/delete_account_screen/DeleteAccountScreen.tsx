@@ -97,9 +97,9 @@ export const DeleteAccountScreen = () => {
           }`}
         >
           {isDeleting ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
+            <ActivityIndicator size="small" color={colors.onPrimary} />
           ) : (
-            <Text className="text-white font-bold text-base">
+            <Text className="text-on-primary dark:text-on-primary font-bold text-base">
               Delete my account
             </Text>
           )}

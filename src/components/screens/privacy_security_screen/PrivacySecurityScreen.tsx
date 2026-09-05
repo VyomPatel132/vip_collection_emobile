@@ -1,11 +1,41 @@
 import { accountSettings } from "@/lib/security_data";
-import { SafeScreen } from "@/components/custom";
+import { AccentColorPicker, SafeScreen } from "@/components/custom";
 import { Icon, ScreenHeader } from "@/components/ui";
+import { useThemeContext, type ThemeMode } from "@/context/ThemeContext";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { useUser } from "@clerk/expo";
 import { router } from "expo-router";
 import { useState } from "react";
 import { ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
+
+// The three theme choices the user can pick. A radio-style list (not
+// a switch) because the choices are mutually exclusive — System
+// follows the device, so toggling it on means Light/Dark are off.
+const THEME_OPTIONS: Array<{
+  id: ThemeMode;
+  icon: "sunny-outline" | "moon-outline" | "phone-portrait-outline";
+  title: string;
+  description: string;
+}> = [
+  {
+    id: "light",
+    icon: "sunny-outline",
+    title: "Light",
+    description: "Always use the light theme",
+  },
+  {
+    id: "dark",
+    icon: "moon-outline",
+    title: "Dark",
+    description: "Always use the dark theme",
+  },
+  {
+    id: "system",
+    icon: "phone-portrait-outline",
+    title: "System",
+    description: "Match this device's appearance",
+  },
+];
 
 type SecurityOption = {
   id: string;
@@ -23,6 +53,7 @@ type SecurityOption = {
 export const PrivacySecurityScreen = () => {
   const { user } = useUser();
   const { colors } = useThemeColor();
+  const { mode, setMode } = useThemeContext();
 
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
@@ -131,6 +162,57 @@ export const PrivacySecurityScreen = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
       >
+        {/* APPEARANCE SECTION */}
+        <View className="px-6 pt-6">
+          <Text className="text-text-primary dark:text-text-primary text-lg font-bold mb-4">
+            Appearance
+          </Text>
+
+          {/*
+           * Radio-style list of three options. The active row shows
+           * a checkmark on the right. The `varsStyle` cascade from
+           * the root wrapper means every `bg-X` / `text-X` /
+           * `border-X` className here tracks the active scheme +
+           * the user's chosen accent.
+           */}
+          <View className="bg-surface dark:bg-surface rounded-2xl overflow-hidden mb-3">
+            {THEME_OPTIONS.map((opt, idx) => {
+              const active = mode === opt.id;
+              return (
+                <TouchableOpacity
+                  key={opt.id}
+                  onPress={() => setMode(opt.id)}
+                  activeOpacity={0.7}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: active }}
+                  className={`flex-row items-center px-4 py-3 ${
+                    idx < THEME_OPTIONS.length - 1
+                      ? "border-b border-border dark:border-border"
+                      : ""
+                  }`}
+                >
+                  <View className="bg-primary/20 rounded-full w-10 h-10 items-center justify-center mr-3">
+                    <Icon name={opt.icon} size={20} color="primary" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-text-primary dark:text-text-primary font-semibold text-base">
+                      {opt.title}
+                    </Text>
+                    <Text className="text-text-secondary dark:text-text-secondary text-xs">
+                      {opt.description}
+                    </Text>
+                  </View>
+                  {active && (
+                    <Icon name="checkmark" size={22} color="primary" />
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+
+        <AccentColorPicker />
+
         {/* SECURITY SECTION */}
         <View className="px-6 pt-6">
           <Text className="text-text-primary dark:text-text-primary text-lg font-bold mb-4">

@@ -1,43 +1,51 @@
 import { Icon } from "@/components/ui";
 import { useAuth, useUser } from "@clerk/expo";
+import { ACCENT_PRESETS } from "@/context/AccentColorContext";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import Animated, { FadeIn, FadeInUp } from "react-native-reanimated";
 
 // Each menu card has a *tinted* icon-and-circle pair — a fashion-shop
-// app shouldn't feel like a system settings page. The brand colors
-// (blue / green / amber / red) are picked to read as accent tags in
-// both light and dark modes; the `/20` opacity comes from the
-// `bg-X/20` Tailwind utility which works because the underlying
-// color token is a real value in both modes.
+// app shouldn't feel like a system settings page. The accent color
+// for each card is looked up from `ACCENT_PRESETS` so the swatches
+// can never drift from the picker.
+//
+//   0: blue (default brand)
+//   1: cyan
+//   2: violet
+//   3: pink
+//   4: emerald
+//   5: amber
+//   6: red
+//   7: near-black
 const MENU_ITEMS = [
   {
     id: 1,
     icon: "person-outline" as const,
     title: "Edit Profile",
-    color: "#3B82F6", // blue-500
+    accentIndex: 0, // blue
     action: "/(profile)/edit-profile",
   },
   {
     id: 2,
-    icon: "receipt-outline" as const, // was list-outline — "receipt" reads as orders
+    icon: "receipt-outline" as const, // "receipt" reads as orders
     title: "Orders",
-    color: "#10B981", // emerald-500
+    accentIndex: 4, // emerald
     action: "/(profile)/orders",
   },
   {
     id: 3,
     icon: "location-outline" as const,
     title: "Addresses",
-    color: "#F59E0B", // amber-500
+    accentIndex: 5, // amber
     action: "/(profile)/addresses",
   },
   {
     id: 4,
     icon: "heart-outline" as const,
     title: "Wishlist",
-    color: "#EF4444", // red-500
+    accentIndex: 6, // red
     action: "/(profile)/wishlist",
   },
 ] as const;
@@ -87,29 +95,32 @@ export const ProfileScreen = () => {
         </Animated.View>
 
         <View className="flex-row flex-wrap gap-2 mx-6 mb-8">
-          {MENU_ITEMS.map((item, idx) => (
-            <Animated.View
-              key={item.id}
-              entering={FadeInUp.delay(idx * 60).duration(350)}
-              style={{ width: "48%" }}
-            >
-              <TouchableOpacity
-                className="bg-surface dark:bg-surface rounded-2xl p-6 items-center justify-center"
-                activeOpacity={0.7}
-                onPress={() => handleMenuPress(item.action)}
+          {MENU_ITEMS.map((item, idx) => {
+            const color = ACCENT_PRESETS[item.accentIndex];
+            return (
+              <Animated.View
+                key={item.id}
+                entering={FadeInUp.delay(idx * 60).duration(350)}
+                style={{ width: "48%" }}
               >
-                <View
-                  className="rounded-full w-16 h-16 items-center justify-center mb-4"
-                  style={{ backgroundColor: item.color + "20" }}
+                <TouchableOpacity
+                  className="bg-surface dark:bg-surface rounded-2xl p-6 items-center justify-center"
+                  activeOpacity={0.7}
+                  onPress={() => handleMenuPress(item.action)}
                 >
-                  <Icon name={item.icon} size={28} color={item.color} />
-                </View>
-                <Text className="text-text-primary dark:text-text-primary font-bold text-base">
-                  {item.title}
-                </Text>
-              </TouchableOpacity>
-            </Animated.View>
-          ))}
+                  <View
+                    className="rounded-full w-16 h-16 items-center justify-center mb-4"
+                    style={{ backgroundColor: color + "20" }}
+                  >
+                    <Icon name={item.icon} size={28} color={color} />
+                  </View>
+                  <Text className="text-text-primary dark:text-text-primary font-bold text-base">
+                    {item.title}
+                  </Text>
+                </TouchableOpacity>
+              </Animated.View>
+            );
+          })}
         </View>
 
         <Animated.View

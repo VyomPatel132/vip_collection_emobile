@@ -49,12 +49,12 @@ function resolveColor(
     case "onPrimary":
       return palette.onPrimary;
     case "danger":
-      // Match the Tailwind `danger` token in both modes.
-      return palette.text.primary === "#0A0A0F" ? "#DC2626" : "#F87171";
+      // Read from the JS palette so it tracks the active scheme.
+      return palette.danger;
     case "success":
-      return palette.text.primary === "#0A0A0F" ? "#16A34A" : "#22C55E";
+      return palette.success;
     case "warning":
-      return palette.text.primary === "#0A0A0F" ? "#D97706" : "#F59E0B";
+      return palette.warning;
     default:
       // Raw color string.
       return color;

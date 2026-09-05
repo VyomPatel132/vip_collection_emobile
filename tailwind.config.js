@@ -1,64 +1,54 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   // Drive the dark palette from a `dark` class on the root, which we
-  // toggle from `app/_layout.tsx` via NativeWind's
-  // `setColorScheme("system")`. Using `'class'` lets us drive the
-  // theme from React state, and is the approach NativeWind 4
-  // recommends for expo-router apps that need live theme switching.
+  // toggle from `app/_layout.tsx` via NativeWind's `setColorScheme`.
+  // Using `'class'` lets us drive the theme from React state, and is
+  // the approach NativeWind 4 recommends for expo-router apps that
+  // need live theme switching.
   darkMode: "class",
   // NOTE: Update this to include the paths to all files that contain Nativewind classes.
   content: ["./src/**/*.{js,jsx,ts,tsx}", "./components/**/*.{js,jsx,ts,tsx}"],
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
-      // All theme tokens expose a `DEFAULT` (light) and `dark` value.
-      // NativeWind 4 resolves `bg-surface` to `surface.DEFAULT` and
-      // `dark:bg-surface` to `surface.dark` based on the color scheme
-      // set via `setColorScheme("system")`. So every component needs
-      // the `dark:` variant to look right in dark mode — the cost of
-      // a clean two-tone palette.
+      // Every color resolves to a CSS variable. The variable values
+      // are defined in `src/styles/global.css` and overridden at
+      // runtime by:
+      //   - `ThemeProvider`       → flips light/dark CSS variables
+      //   - `AccentColorProvider` → flips --color-primary + --color-on-primary
+      // The trailing hex in `var(--name, #hex)` is the compile-time
+      // fallback that Tailwind needs to validate the color, and that
+      // NativeWind renders before the runtime value lands. It falls
+      // back to the light value so first paint never flashes dark on
+      // a light-mode device.
+      //
+      // Why CSS variables (and not `bg-X dark:bg-X`)? In NativeWind 4
+      // the `dark:` variant only gates WHEN a rule applies — it does
+      // NOT swap the value. With the old `{ DEFAULT, dark }` shape,
+      // `bg-surface dark:bg-surface` resolved to `surface.DEFAULT`
+      // (`#F4F4F6`) in both modes, so dark mode never actually
+      // rendered dark. With `var(--color-surface)`, the variable
+      // itself flips and every consumer follows.
       colors: {
-        // Brand accent — a deep champagne-gold that reads as premium
-        // in both light and dark surfaces. The previous Spotify-green
-        // accent was off-brand for a fashion/lifestyle app.
-        primary: {
-          DEFAULT: "#C9A227",
-          dark: "#D4AF37",
-        },
-        // Text/icon color drawn on top of a `primary` fill.
-        "on-primary": {
-          DEFAULT: "#0A0A0F",
-          dark: "#0A0B10",
-        },
-        background: {
-          DEFAULT: "#FFFFFF",
-          dark: "#0B0B0F",
-        },
-        surface: {
-          DEFAULT: "#F4F4F6",
-          dark: "#1A1A20",
-        },
-        "surface-elevated": {
-          DEFAULT: "#FFFFFF",
-          dark: "#23232B",
-        },
-        border: {
-          DEFAULT: "#E5E5EA",
-          dark: "#2A2A33",
-        },
+        primary: "var(--color-primary, #3B82F6)",
+        "on-primary": "var(--color-on-primary, #FFFFFF)",
+        background: "var(--color-background, #FFFFFF)",
+        surface: "var(--color-surface, #F4F4F6)",
+        "surface-elevated": "var(--color-surface-elevated, #FFFFFF)",
+        border: "var(--color-border, #E5E5EA)",
         text: {
-          primary: { DEFAULT: "#0A0A0F", dark: "#FAFAFA" },
-          secondary: { DEFAULT: "#5A5A66", dark: "#A1A1AA" },
-          tertiary: { DEFAULT: "#8A8A93", dark: "#71717A" },
+          primary: "var(--color-text-primary, #0A0A0F)",
+          secondary: "var(--color-text-secondary, #5A5A66)",
+          tertiary: "var(--color-text-tertiary, #8A8A93)",
         },
         input: {
-          background: { DEFAULT: "#F4F4F6", dark: "#1A1A20" },
-          border: { DEFAULT: "#E5E5EA", dark: "#2A2A33" },
-          placeholder: { DEFAULT: "#8A8A93", dark: "#71717A" },
+          background: "var(--color-input-background, #F4F4F6)",
+          border: "var(--color-input-border, #E5E5EA)",
+          placeholder: "var(--color-input-placeholder, #8A8A93)",
         },
-        success: { DEFAULT: "#16A34A", dark: "#22C55E" },
-        warning: { DEFAULT: "#D97706", dark: "#F59E0B" },
-        danger: { DEFAULT: "#DC2626", dark: "#F87171" },
+        success: "var(--color-success, #16A34A)",
+        warning: "var(--color-warning, #D97706)",
+        danger: "var(--color-danger, #DC2626)",
       },
     },
   },

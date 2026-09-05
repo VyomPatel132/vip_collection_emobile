@@ -1,5 +1,5 @@
-import { useColorScheme } from "react-native";
-import { ColorPalette, ColorScheme, Colors } from "@/styles/theme";
+import { useThemeContext } from "@/context/ThemeContext";
+import type { ColorPalette, ColorScheme } from "@/styles/theme";
 
 /**
  * Returns the current color scheme (light/dark) and the matching
@@ -7,11 +7,17 @@ import { ColorPalette, ColorScheme, Colors } from "@/styles/theme";
  * (e.g. Switch, BlurView, Tab bar) read from the returned `colors`
  * object.
  *
+ * The values now come from `ThemeContext` (which the user controls
+ * via the Privacy & Security screen) rather than directly from
+ * `useColorScheme()` — so a manual override applies to both
+ * NativeWind's `dark:` class *and* the JS-side palette, keeping
+ * the two halves in sync.
+ *
  * Usage:
  *   const { scheme, colors } = useThemeColor();
  *   <Switch trackColor={{ true: colors.primary, false: colors.border }} />
  */
 export function useThemeColor(): { scheme: ColorScheme; colors: ColorPalette } {
-  const scheme = (useColorScheme() ?? "light") as ColorScheme;
-  return { scheme, colors: Colors[scheme] };
+  const { scheme, colors } = useThemeContext();
+  return { scheme, colors };
 }

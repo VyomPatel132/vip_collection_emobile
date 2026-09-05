@@ -3,17 +3,79 @@
 @tailwind utilities;
 
 /*
- * The Tailwind config exposes each color as `{ DEFAULT, dark }` and
- * `darkMode: 'class'` drives the dark variant. The `.dark` class
- * is applied to the root by `app/_layout.tsx` so the `dark:` prefix
- * resolves on the web build. NativeWind's `setColorScheme("system")`
- * does the equivalent for React Native.
+ * Theme tokens. Every Tailwind color in `tailwind.config.js`
+ * resolves to one of these CSS variables. Two consumers flip them:
+ *   1. Web — `app/_layout.tsx` toggles `.dark` on <html>.
+ *   2. Native — `ThemeProvider` exposes a `vars(...)` style object
+ *      that the root layout mounts on a wrapper `<View>`; the
+ *      NativeWind `VariableContext` cascades it to every child.
+ *
+ * The first value in each pair is the light-mode default; the
+ * second (after the `/40` and `dark:` markers) is the dark variant
+ * for that token. The AccentColorProvider rebinds `--color-primary`
+ * and `--color-on-primary` at runtime when the user picks a
+ * non-default accent.
  */
-:root { color-scheme: light; }
-:root.dark { color-scheme: dark; }
+:root {
+  color-scheme: light;
 
-/* Web-only: keeps the initial paint from flashing the wrong color
- * before React mounts. On native, SystemUI.setBackgroundColorAsync
- * in `app/_layout.tsx` does the same job. */
-html, body, #root { background-color: #FFFFFF; }
-html.dark, html.dark body, html.dark #root { background-color: #0B0B0F; }
+  /* Brand accent — overridden at runtime by AccentColorProvider. */
+  --color-primary: #3B82F6;
+  --color-on-primary: #FFFFFF;
+
+  /* Surfaces. */
+  --color-background: #FFFFFF;
+  --color-surface: #F4F4F6;
+  --color-surface-elevated: #FFFFFF;
+  --color-border: #E5E5EA;
+
+  /* Type. */
+  --color-text-primary: #0A0A0F;
+  --color-text-secondary: #5A5A66;
+  --color-text-tertiary: #8A8A93;
+
+  /* Inputs. */
+  --color-input-background: #F4F4F6;
+  --color-input-border: #E5E5EA;
+  --color-input-placeholder: #8A8A93;
+
+  /* Status. */
+  --color-success: #16A34A;
+  --color-warning: #D97706;
+  --color-danger: #DC2626;
+}
+
+:root.dark,
+.dark {
+  color-scheme: dark;
+
+  --color-primary: #60A5FA;     /* blue-400 — brighter for dark surfaces */
+  --color-on-primary: #0A0A0F;  /* near-black reads on blue-400 */
+
+  --color-background: #0B0B0F;
+  --color-surface: #1A1A20;
+  --color-surface-elevated: #23232B;
+  --color-border: #2A2A33;
+
+  --color-text-primary: #FAFAFA;
+  --color-text-secondary: #A1A1AA;
+  --color-text-tertiary: #71717A;
+
+  --color-input-background: #1A1A20;
+  --color-input-border: #2A2A33;
+  --color-input-placeholder: #71717A;
+
+  --color-success: #22C55E;
+  --color-warning: #F59E0B;
+  --color-danger: #F87171;
+}
+
+/*
+ * Web-only first-paint guard. On native, the broadcast in
+ * `_layout.tsx` applies the variables before React paints.
+ * These two rules make sure the brief moment before React mounts
+ * matches the resolved theme so the user never sees a flash of
+ * the wrong color.
+ */
+html, body, #root { background-color: var(--color-background, #FFFFFF); }
+html.dark, html.dark body, html.dark #root { background-color: var(--color-background, #0B0B0F); }
